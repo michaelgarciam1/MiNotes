@@ -1,19 +1,26 @@
 package com.example.minotes;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 import java.util.Date;
 
 import lombok.Getter;
 import lombok.Setter;
 
+@Setter
+@Getter
+@Entity(tableName = "notes")
 public class Note {
-    @Setter @Getter private  String title;
-    @Setter @Getter private Date date;
-    @Setter @Getter private String content;
+    // Getters y setters
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+    private String title;
+    private Date date;
+    private String content;
+
+    // Constructor
 
     public Note() {
-        this.title = "";
-        this.date = new Date();
-        this.content = "";
     }
 
     public Note(String title, Date date, String content) {
@@ -21,4 +28,7 @@ public class Note {
         this.date = date;
         this.content = content;
     }
+
+
+
 }
