@@ -48,7 +48,11 @@ public class MainActivity extends AppCompatActivity {
         // Configura el RecyclerView y el adaptador
         RecyclerView noteRecycler = findViewById(R.id.noteRecycler);
         noteRecycler.setLayoutManager(new LinearLayoutManager(this));
-        noteAdapter = new NoteAdapter(noteList);
+        noteAdapter = new NoteAdapter(noteList, note -> {
+            Intent intent = new Intent(MainActivity.this, ViewNoteActivity.class);
+            intent.putExtra("note_id", note.getId());
+            startActivity(intent);
+        });
         noteRecycler.setAdapter(noteAdapter);
 
         // Cargar las notas desde la base de datos en un hilo secundario
@@ -78,7 +82,9 @@ public class MainActivity extends AppCompatActivity {
         new Thread(() -> {
             noteDao.insert(note);
             noteList.add(note);
-            runOnUiThread(() -> noteAdapter.notifyDataSetChanged());
+            runOnUiThread(() -> {
+                noteAdapter.notifyDataSetChanged();
+            });
         }).start();
     }
 }

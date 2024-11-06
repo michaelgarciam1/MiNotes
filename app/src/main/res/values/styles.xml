@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.MyApp" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Color de fondo principal de la actividad -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true
+        </item> <!-- Hace que los iconos sean oscuros para fondos claros -->
+        <!-- Otros colores y configuraciones del tema -->
+    </style>
+</resources>
