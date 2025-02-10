@@ -1,14 +1,18 @@
 package com.example.minotes;
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -22,24 +26,6 @@ public class MainActivity extends AppCompatActivity {
     private List<Note> noteList = new ArrayList<>();
     private NoteAdapter noteAdapter;
 
-    // Definir el ActivityResultLauncher para manejar el resultado de AddNoteActivity
-    private final ActivityResultLauncher<Intent> addNoteActivityLauncher =
-            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    Intent data = result.getData();
-                    String title = data.getStringExtra("note_title");
-                    String content = data.getStringExtra("note_content");
-
-                    // Crear y añadir la nueva nota a la base de datos
-                    Note newNote = new Note();
-                    newNote.setTitle(title);
-                    newNote.setContent(content);
-                    newNote.setDate(new Date());
-
-                    addNoteToDatabase(newNote);
-                }
-            });
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,7 +34,10 @@ public class MainActivity extends AppCompatActivity {
         // Inicializar la base de datos y el DAO
         noteDatabase = NoteDatabase.getInstance(this);
         noteDao = noteDatabase.noteDao();
+        initializeNotes();
+    }
 
+    public void initializeNotes() {
         // Configura el RecyclerView y el adaptador
         RecyclerView noteRecycler = findViewById(R.id.noteRecycler);
         noteRecycler.setLayoutManager(new LinearLayoutManager(this));
@@ -99,6 +88,24 @@ public class MainActivity extends AppCompatActivity {
             addNoteActivityLauncher.launch(intent);
         });
     }
+
+    // Definir el ActivityResultLauncher para manejar el resultado de AddNoteActivity
+    private final ActivityResultLauncher<Intent> addNoteActivityLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Intent data = result.getData();
+                    String title = data.getStringExtra("note_title");
+                    String content = data.getStringExtra("note_content");
+
+                    // Crear y añadir la nueva nota a la base de datos
+                    Note newNote = new Note();
+                    newNote.setTitle(title);
+                    newNote.setContent(content);
+                    newNote.setDate(new Date());
+
+                    addNoteToDatabase(newNote);
+                }
+            });
 
     private void loadNotesFromDatabase() {
         new Thread(() -> {
