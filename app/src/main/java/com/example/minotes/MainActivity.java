@@ -1,8 +1,10 @@
 package com.example.minotes;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -10,6 +12,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -48,12 +52,42 @@ public class MainActivity extends AppCompatActivity {
         // Configura el RecyclerView y el adaptador
         RecyclerView noteRecycler = findViewById(R.id.noteRecycler);
         noteRecycler.setLayoutManager(new LinearLayoutManager(this));
-        noteAdapter = new NoteAdapter(noteList, note -> {
-            Intent intent = new Intent(MainActivity.this, ViewNoteActivity.class);
-            intent.putExtra("note_id", note.getId());
-            startActivity(intent);
+        Executor executor = Executors.newSingleThreadExecutor();
+        noteAdapter = new NoteAdapter(noteList, new NoteAdapter.OnNoteClickListener() {
+            @Override
+            public void onNoteClick(Note note) {
+                // Manejar clic normal
+                System.out.println("Clic en la nota: " + note.getTitle());
+                Intent intent = new Intent(MainActivity.this, ViewNoteActivity.class);
+                intent.putExtra("note_id", note.getId());
+                startActivity(intent);
+            }
+
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onNoteLongClick(Note note) {
+                // Acción para clic largo (eliminar nota)
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("Eliminar Nota")
+                        .setMessage("¿Estás seguro de que deseas eliminar esta nota?")
+                        .setPositiveButton("Sí", (dialog, which) -> {
+                            // Eliminar la nota en un hilo de fondo
+                            executor.execute(() -> {
+                                noteDao.delete(note);
+
+                                // Actualizar la lista en la interfaz de usuario
+                                runOnUiThread(() -> {
+                                    noteList.remove(note);
+                                    noteAdapter.notifyDataSetChanged();
+                                });
+                            });
+                        })
+                        .setNegativeButton("No", null)
+                        .show();
+            }
         });
         noteRecycler.setAdapter(noteAdapter);
+
 
         // Cargar las notas desde la base de datos en un hilo secundario
         loadNotesFromDatabase();
@@ -70,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
         new Thread(() -> {
             // Cargar las notas desde la base de datos
             List<Note> notes = noteDao.getAllNotes();
+
             noteList.clear();
             noteList.addAll(notes);
 
@@ -81,8 +116,8 @@ public class MainActivity extends AppCompatActivity {
     private void addNoteToDatabase(Note note) {
         new Thread(() -> {
             noteDao.insert(note);
-            noteList.add(note);
             runOnUiThread(() -> {
+                loadNotesFromDatabase();
                 noteAdapter.notifyDataSetChanged();
             });
         }).start();

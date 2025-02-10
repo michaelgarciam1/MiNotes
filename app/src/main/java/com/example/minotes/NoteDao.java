@@ -15,7 +15,7 @@ public interface NoteDao {
     @Delete
     void delete(Note note);
 
-    @Query("SELECT * FROM notes ORDER BY date DESC")
+    @Query("SELECT * FROM notes ORDER BY date ASC")
     List<Note> getAllNotes();
 
 

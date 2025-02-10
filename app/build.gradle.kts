@@ -43,5 +43,6 @@ dependencies {
     implementation("org.projectlombok:lombok:1.18.24")
     annotationProcessor("org.projectlombok:lombok:1.18.24")
     implementation("androidx.room:room-runtime:2.5.2") // Asegúrate de que sea la versión actual
-    annotationProcessor("androidx.room:room-compiler:2.5.2") // Para Java
+    annotationProcessor("androidx.room:room-compiler:2.5.2")
+    implementation ("androidx.biometric:biometric:1.4.0-alpha02")
 }
